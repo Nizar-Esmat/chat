@@ -1,7 +1,7 @@
 import express from "express"
 import dontenv from "dotenv"
 import path from "path"
-
+import { ConnectDb } from "../lib/db.js";
 
 
 const app = express();
@@ -22,6 +22,9 @@ if (process.env.NODE_ENV == "production") {
         res.sendFile(path.join(__dirname, "../../frontEnd/dist/index.html"))
     })
 }
-app.listen(PORT, () => {
-    console.log(`server is runing on port ${PORT}`)
-}) 
+
+ConnectDb(()=>{
+    app.listen(PORT, () => {
+        console.log("server is running on port " + PORT);
+    })
+})
