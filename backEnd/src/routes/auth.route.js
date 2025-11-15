@@ -6,7 +6,7 @@ const route = express.Router()
 
 
 route.post("/signUp", [
-    body("name")
+    body("fullName")
         .trim()
         .notEmpty()
         .withMessage("name is requierd")
@@ -23,20 +23,21 @@ route.post("/signUp", [
             }
         }),
 
-
-
     body('password')
         .isLength({ min: 6 }).withMessage("password must be more than 6"),
-
 
     body("passwordConfirmation").custom((value, { req }) => {
         return value === req.body.password
     })
 
-
-
 ], signUp)
 
+
+
+route.get("/hello" , (req, res)=>{
+    console.log("hello");
+    res.send("hello")
+})
 
 
 export default route;

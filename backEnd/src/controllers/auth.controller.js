@@ -2,7 +2,8 @@
 import { validationResult } from "express-validator";
 import bycrypt from "bcryptjs"
 import User from "../models/user.model.js";
-export const signUp = async () => {
+import { generateToken } from "../lib/utils.js";
+export const signUp = async (req, res) => {
     const { fullName, email, password } = req.body;
     try {
         const result = validationResult(req)

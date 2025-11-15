@@ -1,21 +1,20 @@
 import express from "express"
-import dontenv from "dotenv"
+import dotenv from "dotenv"
 import path from "path"
 import { ConnectDb } from "../lib/db.js";
 
 
 const app = express();
 const __dirname = path.resolve();
-dontenv.config()
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json())
 
+
 import authRoutes from "./routes/auth.route.js"
-app.use("api/auth", authRoutes)
-
-
+app.use("/api/auth", authRoutes)
 
 if (process.env.NODE_ENV == "production") {
     app.use(express.static(path.join(__dirname, "../../frontEnd/dist")))
