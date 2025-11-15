@@ -7,8 +7,14 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "npm run start --prefix backend"
+    "build": "npm install --prefix backEnd && npm install --prefix frontEnd && npm run build --prefix frontEnd",
+    "start": "npm run start --prefix backEnd",
+    "dev": "concurrently \"npm run dev --prefix backEnd\" \"npm run dev --prefix frontEnd\"",
+    "server": "npm run dev --prefix backEnd",
+    "client": "npm run dev --prefix frontEnd"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   },
   "repository": {
     "type": "git",

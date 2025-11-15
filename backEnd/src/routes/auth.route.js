@@ -17,7 +17,7 @@ route.post("/signUp", [
         .isEmail()
         .withMessage("the email must be valid")
         .custom(async (value, { req }) => {
-            const user = await User.findOne({ email })
+            const user = await User.findOne({ email:value })
             if (user) {
                 throw new Error("user already exist")
             }
@@ -31,13 +31,4 @@ route.post("/signUp", [
     })
 
 ], signUp)
-
-
-
-route.get("/hello" , (req, res)=>{
-    console.log("hello");
-    res.send("hello")
-})
-
-
 export default route;
