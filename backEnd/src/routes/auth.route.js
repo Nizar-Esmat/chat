@@ -1,5 +1,5 @@
 import express from "express";
-import { signUp } from "../controllers/auth.controller.js"
+import { logOut, signIn, signUp } from "../controllers/auth.controller.js"
 import { body } from "express-validator"
 import User from "../models/user.model.js";
 const route = express.Router()
@@ -31,4 +31,26 @@ route.post("/signUp", [
     })
 
 ], signUp)
-export default route;
+
+route.post("/login",[
+    body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("the email must be valid"),
+
+
+    body("password")
+    .trim()
+    .notEmpty()
+    .withMessage("password is required")
+    .isLength({min :  3  , max : 30})
+    .withMessage("password must be more than 3 and less than 30")
+
+    
+
+]  ,signIn)
+
+route.post("/logout", logOut)
+export default route;  
