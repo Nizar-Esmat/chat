@@ -3,10 +3,12 @@ import { logOut, signIn, signUp } from "../controllers/auth.controller.js"
 import { body } from "express-validator"
 import User from "../models/user.model.js";
 import { is_auth } from "../middleware/auth.middleware.js";
+import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 const route = express.Router()
 
+route.use(arcjetProtection)
 
-route.post("/signUp", [
+route.post("/signUp" , [
     body("fullName")
         .trim()
         .notEmpty()
@@ -53,7 +55,7 @@ route.post("/login", [
 route.post("/logout", logOut)
 
 
-route.put("/updateProfile", is_auth, [
+route.put("/updateProfile" , is_auth, [
     body("fullName")
         .trim()
         .notEmpty()
@@ -68,7 +70,7 @@ route.put("/updateProfile", is_auth, [
 ])
 
 
-route.get("/is_auth", is_auth, (req, res) => {
+route.get("/is_auth"  , is_auth, (req, res) => {
     res.status(200).json({
         user: req.user
     })
