@@ -15,29 +15,32 @@ export const signUp = async (req, res) => {
         if (password !== passwordConfirmation) {
             return res.status(400).json({ errors: [{ msg: "passwords don't match" }] })
         }
-        
+
         const hashedPassword = await bycrypt.hash(password, 12);
-        
-        let uploadedImage ;
+
+        let uploadedImage;
         if (profilePic) {
             uploadedImage = await cloudnary.uploader.upload(profilePic);
         }
-        
+
         const newUser = new User({
             fullName,
             email,
             password: hashedPassword,
             profilePic: uploadedImage.secure_url
         })
-        
+
         await newUser.save()
-        
+
         try {
-            await sendWelcomeEmail(newUser.email, newUser.fullName, process.env.CLIENT_URL);
+            if (process.env.NODE_ENV !== 'production' && newUser.email === 'nizaresmat2000@gmail.com') {
+                await sendWelcomeEmail(newUser.email, newUser.fullName, process.env.CLIENT_URL);
+
+            }
         } catch (emailErr) {
             console.log("Error sending welcome email:", emailErr);
         }
-        
+
         generateToken(newUser._id, res)
         res.status(201).json({
             id: newUser._id,
@@ -46,7 +49,7 @@ export const signUp = async (req, res) => {
             profilePic: newUser.profilePic,
             msg: "user created successfully"
         })
-        
+
     } catch (err) {
         console.log("error in signUp controller:", err);
         res.status(500).json({ msg: "internal server error", error: err.message })
