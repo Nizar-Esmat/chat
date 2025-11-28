@@ -90,9 +90,15 @@ export const logOut = (_, res) => {
 }
 export const updateProfile = async (req, res) => {
     try {
-        const { fullName, profilePic } = req.body;
+        let { fullName, profilePic } = req.body;
         const userId = req.user.id;
         const user = await User.findById(req.user.id);
+        if(fullName === ""){
+            fullName = user.fullName
+        }
+        if (profilePic === "") {
+            profilePic = user.profilePic
+        }
         if (!user) {
             return res.status(400).json({ errors: [{ msg: "user not found" }] })
         }

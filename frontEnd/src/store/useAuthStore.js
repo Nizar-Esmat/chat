@@ -13,8 +13,8 @@ export const useAuthStore = create((set, get) => ({
     checkAuth: async () => {
         try {
             const res = await api.get("/auth/is_auth");
-            set({ authUser: res.data });
-        } catch (error) {
+            set({ authUser: res.data.user });
+        } catch (error) {   
             console.log("Error in authCheck:", error);
             set({ authUser: null });
         } finally {
@@ -40,8 +40,8 @@ export const useAuthStore = create((set, get) => ({
         set({ isLoggingIn: true });
         try {
             const res = await api.post("/auth/login", data);
-            set({ authUser: res.data });
-            console.log(res.data);
+            set({ authUser: res.data.user });
+            console.log(res.data.user);
         } catch (error) {
             console.log("Error in login:", error);
         } finally {
@@ -61,12 +61,12 @@ export const useAuthStore = create((set, get) => ({
 
     updateProfile: async (data) => {
         try {
-            const res = await api.put("/auth/update-profile", data);
-            set({ authUser: res.data });
+            const res = await api.put("/auth/updateProfile", data);
+            set({ authUser: res.data.user });
             console.log("Profile updated successfully");
         } catch (error) {
             console.log("Error in update profile:", error);
         }
-    },
+    },  
     
 }));
