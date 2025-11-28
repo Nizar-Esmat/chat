@@ -3,14 +3,20 @@ import dotenv from "dotenv"
 import path from "path"
 import { ConnectDb } from "../lib/db.js";
 import cookieParser from "cookie-parser"
+import cors from "cors"
+
 
 
 const app = express();
 const __dirname = path.resolve();
 dotenv.config()
 
-const PORT = process.env.PORT || 3000;
+const PORT = 5000;
 
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())

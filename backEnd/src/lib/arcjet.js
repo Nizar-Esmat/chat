@@ -6,15 +6,15 @@ const aj = arcjet({
 
     key: process.env.ARCJET_KEY,
     rules: [
-        shield({ mode: "LIVE" }),
+        shield({ mode: "DRY_RUN" }),
         detectBot({
-            mode: "LIVE",
+            mode: "DRY_RUN",
             allow: [
                 "CATEGORY:SEARCH_ENGINE"
             ],
         }),
         slidingWindow({
-            mode: "LIVE",
+            mode: "DRY_RUN",
             max: 10,
             interval: 60
         }),
