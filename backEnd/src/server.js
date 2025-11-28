@@ -23,6 +23,8 @@ app.use(cookieParser())
 
 import authRoutes from "./routes/auth.route.js"
 app.use("/api/auth", authRoutes)
+import massagesRoute from "./routes/massage.route.js"
+app.use("/api/massage", massagesRoute)
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, "../../frontEnd/dist")))
