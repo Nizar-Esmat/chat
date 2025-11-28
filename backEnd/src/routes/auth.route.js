@@ -1,5 +1,5 @@
 import express from "express";
-import { logOut, signIn, signUp } from "../controllers/auth.controller.js"
+import { logOut, signIn, signUp, updateProfile } from "../controllers/auth.controller.js"
 import { body } from "express-validator"
 import User from "../models/user.model.js";
 import { is_auth } from "../middleware/auth.middleware.js";
@@ -67,7 +67,7 @@ route.put("/updateProfile" , is_auth, [
         .trim()
         .notEmpty()
         .withMessage("profile pic is required"),
-])
+] , updateProfile)
 
 
 route.get("/is_auth"  , is_auth, (req, res) => {
