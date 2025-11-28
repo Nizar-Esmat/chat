@@ -14,7 +14,6 @@ export const useAuthStore = create((set, get) => ({
         try {
             const res = await api.get("/auth/is_auth");
             set({ authUser: res.data });
-            get().connectSocket();
         } catch (error) {
             console.log("Error in authCheck:", error);
             set({ authUser: null });
@@ -42,9 +41,7 @@ export const useAuthStore = create((set, get) => ({
         try {
             const res = await api.post("/auth/login", data);
             set({ authUser: res.data });
-
             console.log(res.data);
-            get().connectSocket();
         } catch (error) {
             console.log("Error in login:", error);
         } finally {
@@ -56,7 +53,6 @@ export const useAuthStore = create((set, get) => ({
         try {
             await api.post("/auth/logout");
             set({ authUser: null });
-            get().disconnectSocket();
             console.log("Logout successful");
         } catch (error) {
             console.log("Logout error:", error);
