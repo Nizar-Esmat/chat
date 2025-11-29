@@ -8,8 +8,6 @@
   },
   "scripts": {
     "build": "npm install --prefix backEnd && npm install --prefix frontEnd && npm run build --prefix frontEnd",
-    "start": "npm run start --prefix backEnd",
-    "dev": "concurrently \"npm run dev --prefix backEnd\" \"npm run dev --prefix frontEnd\"",
     "server": "npm run dev --prefix backEnd",
     "client": "npm run dev --prefix frontEnd"
   },
