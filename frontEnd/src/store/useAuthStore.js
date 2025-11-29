@@ -9,6 +9,7 @@ export const useAuthStore = create((set, get) => ({
     isLoggingIn: false,
     socket: null,
     onlineUsers: [],
+    isUpdatingProfile: false,
 
     checkAuth: async () => {
         try {
@@ -60,12 +61,15 @@ export const useAuthStore = create((set, get) => ({
     },
 
     updateProfile: async (data) => {
+        set({ isUpdatingProfile: true });
         try {
             const res = await api.put("/auth/updateProfile", data);
             set({ authUser: res.data.user });
             console.log("Profile updated successfully");
         } catch (error) {
             console.log("Error in update profile:", error);
+        }finally {
+            set({ isUpdatingProfile: false });
         }
     },  
     

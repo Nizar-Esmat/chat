@@ -1,12 +1,12 @@
 import { useState, useRef } from "react";
-import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
+import { LogOutIcon, VolumeOffIcon, Volume2Icon, Loader, LoaderIcon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
 function ProfileHeader() {
-  const { logout, authUser, updateProfile } = useAuthStore();
+  const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
 
@@ -31,29 +31,36 @@ function ProfileHeader() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* AVATAR */}
-          <div className="avatar online">
-            <button
-              className="size-14 rounded-full overflow-hidden relative group"
-              onClick={() => fileInputRef.current.click()}
-            >
-              <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
-                alt="User image"
-                className="size-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <span className="text-white text-xs">Change</span>
-              </div>
-            </button>
+          {isUpdatingProfile ? (
+            <LoaderIcon className="size-10 animate-spin" />
+          ) :
+            (
+              <div className="avatar online">
+                <button
+                  className="size-14 rounded-full overflow-hidden relative group"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  <img
+                    src={selectedImg || authUser.profilePic || "/avatar.png"}
+                    alt="User image"
+                    className="size-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span className="text-white text-xs">Change</span>
+                  </div>
+                </button>
 
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+            )
+          }
 
           {/* USERNAME & ONLINE TEXT */}
           <div>
@@ -92,8 +99,8 @@ function ProfileHeader() {
             )}
           </button>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 export default ProfileHeader;

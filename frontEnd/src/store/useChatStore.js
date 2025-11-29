@@ -4,18 +4,18 @@ const useChatStore = create((set, get) => ({
     allContacts: [],
     chats: [],
     message: [],
-    activeTap: "chats",
+    activeTab: "chats",
     selectedUser: null,
     isUsersLoading: false,
     isMassageLoading: false,
-    isSoundEnabled: localStorage.getItem('sound') === 'true',
+    isSoundEnabled: JSON.parse(localStorage.getItem('sound')),
 
     toggleSound: () => {
         localStorage.setItem("sound", !get().isSoundEnabled)
         set({ isSoundEnabled: !get().isSoundEnabled })
     },
-    setActiveTap: (tab) => {
-        set({ activeTap: tab })
+    setActiveTab: (tab) => {
+        set({ activeTab: tab })
     },
 
     setSelectedUser: (selectedUser) => {
@@ -32,17 +32,19 @@ const useChatStore = create((set, get) => ({
             set({ isUsersLoading: false })
         }
     },
-    getMyChatPartenrs: async () => {
+    getMyChatPartners: async () => {
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/chats")
             console.log(res.data)
-            set({ chats: res.data, isUsersLoading: false })
+            set({ chats: res.data.partners, isUsersLoading: false })
         } catch (error) {
             console.log(error)
             set({ isUsersLoading: false })
         }
     }
+    , 
+
 
 }))
 
