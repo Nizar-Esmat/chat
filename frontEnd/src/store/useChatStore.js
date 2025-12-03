@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import api from './api'
+import { useAuthStore } from './useAuthStore'
 const useChatStore = create((set, get) => ({
     allContacts: [],
     chats: [],
-    message: [],
+    messages: [],
     activeTab: "chats",
     selectedUser: null,
     isUsersLoading: false,
@@ -43,8 +44,43 @@ const useChatStore = create((set, get) => ({
             set({ isUsersLoading: false })
         }
     }
-    , 
+    ,
+    getMessagesByUserId: async (userId) => {
+        set({ isMassageLoading: true })
+        try {
+            const res = api.get(`/massage/${userId}`)
+            console.log(res.data)
+            set({ messages: res.data })
+        } catch (error) {
+            console.log(error)
+        } finally {
+            set({ isMassageLoading: false })
+        }
+    },
 
+    sendMessage: async (massageData) => {
+        const { selectedUser, messages } = get();
+        const { authUser } = useAuthStore.getState()
+        const tempId = `temp-${Date.now()}`
+        const tempMessage = {
+            _id: tempId,
+            senderId: authUser._id,
+            receiverId: selectedUser._id,
+            text: massageData.text,
+            image: massageData.image,
+            createdAt: new Date().toISOString(),
+            isTemp: true
+        }
+        set({ messages: messages.concat(tempMessage) })
+        try {
+            const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
+            console.log(res.data)
+            set({ messages: messages.concat(res.data) })
+        } catch (error) {
+            set({ messages: messages })
+            console.error("Error sending message:", error);
+        }
+    }
 
 }))
 
