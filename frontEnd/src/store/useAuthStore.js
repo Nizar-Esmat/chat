@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "./api.js";
+import { io } from "socket.io-client"
 
 
 export const useAuthStore = create((set, get) => ({
@@ -15,7 +16,8 @@ export const useAuthStore = create((set, get) => ({
         try {
             const res = await api.get("/auth/is_auth");
             set({ authUser: res.data.user });
-        } catch (error) {   
+            get().connectSocket();
+        } catch (error) {
             console.log("Error in authCheck:", error);
             set({ authUser: null });
         } finally {
@@ -43,6 +45,8 @@ export const useAuthStore = create((set, get) => ({
             const res = await api.post("/auth/login", data);
             set({ authUser: res.data.user });
             console.log(res.data.user);
+
+            get().connectSocket()
         } catch (error) {
             console.log("Error in login:", error);
         } finally {
@@ -54,6 +58,7 @@ export const useAuthStore = create((set, get) => ({
         try {
             await api.post("/auth/logout");
             set({ authUser: null });
+            get().disconnectSocket()
             console.log("Logout successful");
         } catch (error) {
             console.log("Logout error:", error);
@@ -68,9 +73,27 @@ export const useAuthStore = create((set, get) => ({
             console.log("Profile updated successfully");
         } catch (error) {
             console.log("Error in update profile:", error);
-        }finally {
+        } finally {
             set({ isUpdatingProfile: false });
         }
-    },  
-    
+    },
+    connectSocket: () => {
+        const { authUser } = get()
+        if (!authUser || get().socket?.connected) {
+            return
+        }
+
+        const socket = io(import.meta.env.VITE_SOCKET_URL, { withCredentials: true })
+        socket.connect()
+        set({ socket })
+        console.log("Socket connected" , socket);
+
+        socket.on("getOnlineUsers", (userIds) => {
+            set({ onlineUsers: userIds });
+        })
+    },
+    disconnectSocket: () => {
+        const { socket } = get()
+        socket.disconnect()
+    }
 }));

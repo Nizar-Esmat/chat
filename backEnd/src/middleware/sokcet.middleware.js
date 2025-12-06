@@ -1,44 +1,35 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
 export const socketAuthMiddleware = async (socket, next) => {
     try {
-        const token = socket.handshake.auth.token
-            .split("; ")
-            .find((raw) => {
-                raw.startsWith("jwt=")
-            })
-            .split("=")[1];
+        // Socket.IO passes cookies in socket.handshake
+        const cookies = socket.handshake.headers.cookie;
 
+        if (!cookies) {
+            return next(new Error("No cookies found"));
+        }
+
+        const token = cookies.split("; ")
+            .find(row => row.startsWith("jwt="))
+            ?.split("=")[1];
 
         if (!token) {
-            console.log("No token provided in socket handshake");
-            return next(new Error("Authentication error: No token provided"));
+            return next(new Error("No token found"));
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded) {
-            console.log("Invalid token");
-            return next(new Error("Authentication error: Invalid token"));
-        }
+        const user = await User.findById(decoded.userId).select("-password");
 
-        const user = await User.findById(decoded.id).select("-password");
         if (!user) {
-            console.log("User not found");
-            return next(new Error("Authentication error: User not found"));
+            return next(new Error("User not found"));
         }
 
         socket.user = user;
         socket.userId = user._id.toString();
-
-        console.log("Socket authenticated:", socket.userId);
         next();
-
     } catch (error) {
-        console.error("Socket authentication error:", error);
+        console.log("Socket authentication error:", error);
+        next(new Error("Authentication failed"));
     }
-}
+};
