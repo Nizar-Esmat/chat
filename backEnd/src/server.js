@@ -1,12 +1,14 @@
 import express from "express"
 import path from "path"
+import { fileURLToPath } from 'url';
 import { ConnectDb } from "../lib/db.js";
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import { app, httpServer } from "./lib/socket.js";
 import { env } from "./config/env.js";
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(cors({
     origin: env.CLIENT_URL,
@@ -23,7 +25,7 @@ app.use("/api/massage", massagesRoute)
 
 // Serve frontend in production
 if (env.NODE_ENV === "production") {
-    const frontendPath = path.join(__dirname, "../../frontEnd/dist");
+    const frontendPath = path.join(__dirname, "../../../frontEnd/dist");
     
     // Serve static files
     app.use(express.static(frontendPath));
