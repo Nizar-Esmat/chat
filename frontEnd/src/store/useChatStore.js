@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import api from './api'
 import { useAuthStore } from './useAuthStore'
+
+const notificationSound = new Audio('/sounds/notification.mp3');
 const useChatStore = create((set, get) => ({
     allContacts: [],
     chats: [],
@@ -48,9 +50,8 @@ const useChatStore = create((set, get) => ({
     getMessagesByUserId: async (userId) => {
         set({ isMassageLoading: true })
         try {
-            const res = api.get(`/massage/${userId}`)
-            console.log(res.data)
-            set({ messages: res.data })
+            const res = await api.get(`/massage/${userId}`)
+            set({ messages: res.data.massages })
         } catch (error) {
             console.log(error)
         } finally {
@@ -71,17 +72,38 @@ const useChatStore = create((set, get) => ({
             createdAt: new Date().toISOString(),
             isTemp: true
         }
-        set({ messages: messages.concat(tempMessage) })
+        console.log("messages : " ,messages)
+        console.log("tempMessage : " ,tempMessage)
+        set({ messages: [...messages , tempMessage] })
         try {
             const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
             console.log(res.data)
-            set({ messages: messages.concat(res.data) })
+            set({ messages: messages.filter(msg => msg._id !== tempId).concat(res.data.massage) })
         } catch (error) {
-            set({ messages: messages })
+            set({ messages: messages.filter(msg => msg._id !== tempId) })
             console.error("Error sending message:", error);
         }
+    },
+    subscribeToMessages: () => {
+        const { selectedUser, isSoundEnabled } = get();
+        if (!selectedUser) return;
+        const socket = useAuthStore.getState().socket;
+        socket?.on("newMassage", ({ newMassage }) => {
+            const currentMessages = get().messages;
+            set({ messages: [...currentMessages, newMassage] });
+            if (isSoundEnabled) {
+                notificationSound.currentTime = 0;
+                notificationSound.play()
+                    .catch((error) => {
+                        console.error("Error playing notification sound:", error);
+                    });
+            }
+        });
+    },
+    unsubscribeFromMessages : ()=>{
+        const socket = useAuthStore.getState().socket;
+        socket?.off("newMassage");
     }
-
 }))
 
 export { useChatStore }

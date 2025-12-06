@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import Massage from "../models/massage.model.js";
 import User from "../models/user.model.js";
 import cloudnary from "../lib/cloudinary.js";
+import { getReceiverSocketId } from "../lib/socket.js";
 
 
 const getAllContacts = async (req, res) => {
@@ -74,6 +75,11 @@ const sendMassage = async (req, res) => {
         });
 
         await newMassage.save()
+
+        const receiverSocketId = getReceiverSocketId(reseiverId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMassage", { newMassage });
+        }
         res.status(201).json({ msg: "massage sent successfully", massage: newMassage });
 
     } catch (error) {
