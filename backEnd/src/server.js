@@ -4,10 +4,10 @@ import path from "path"
 import { ConnectDb } from "../lib/db.js";
 import cookieParser from "cookie-parser"
 import cors from "cors"
+import { app, httpServer } from "./lib/socket.js";
 
 
 
-const app = express();
 const __dirname = path.resolve();
 dotenv.config()
 
@@ -40,7 +40,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 ConnectDb(()=>{
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
         console.log("server is running on port " + PORT);
     })
 })

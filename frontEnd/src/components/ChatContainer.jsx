@@ -18,6 +18,8 @@ function ChatContainer() {
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
 
+  console.log("messages" , messages)
+
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
@@ -62,7 +64,7 @@ function ChatContainer() {
                   </p>
                 </div>
               </div>
-            ))}
+            ))} 
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
