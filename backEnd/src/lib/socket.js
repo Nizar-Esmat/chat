@@ -21,6 +21,10 @@ const io = new Server(httpServer, {
 
 io.use(socketAuthMiddleware)
 
+export const getReceiverSocketId = (userId) => {
+    return userSocketMap[userId];
+}
+
 const userSocketMap = {};
 
 io.on("connection", (socket) => {
@@ -37,6 +41,7 @@ io.on("connection", (socket) => {
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 });
+
 
 
 export { io, app, httpServer }

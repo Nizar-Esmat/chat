@@ -78,22 +78,43 @@ export const useAuthStore = create((set, get) => ({
         }
     },
     connectSocket: () => {
-        const { authUser } = get()
-        if (!authUser || get().socket?.connected) {
+        const { authUser, socket } = get()
+        if (!authUser) {
+            console.log("Cannot connect socket: No authenticated user");
+            return
+        }
+        
+        if (socket?.connected) {
+            console.log("Socket already connected");
             return
         }
 
-        const socket = io(import.meta.env.VITE_SOCKET_URL, { withCredentials: true })
-        socket.connect()
-        set({ socket })
-        console.log("Socket connected" , socket);
+        console.log("Connecting to socket...");
+        const newSocket = io(import.meta.env.VITE_SOCKET_URL, { 
+            withCredentials: true 
+        })
+        
+        newSocket.on("connect", () => {
+            console.log("Socket connected successfully");
+        })
+        
+        newSocket.on("connect_error", (error) => {
+            console.error("Socket connection error:", error);
+        })
 
-        socket.on("getOnlineUsers", (userIds) => {
+        newSocket.on("getOnlineUsers", (userIds) => {
+            console.log("Online users updated:", userIds);
             set({ onlineUsers: userIds });
         })
+        
+        set({ socket: newSocket })
     },
     disconnectSocket: () => {
         const { socket } = get()
-        socket.disconnect()
+        if (socket?.connected) {
+            socket.disconnect()
+            console.log("Socket disconnected");
+        }
+        set({ socket: null })
     }
 }));
