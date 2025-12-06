@@ -25,12 +25,9 @@ app.use("/api/massage", massagesRoute)
 app.use(express.static(path.join(__dirname, "../../frontEnd/dist")))
 
 // SPA fallback for non-API routes in production
-if (process.env.NODE_ENV !== "production") {
-    app.use((req, res, next) => {
-        if (req.method === "GET" && !req.path.startsWith("/api/")) {
-            return res.sendFile(path.join(__dirname, "../../frontEnd/dist/index.html"))
-        }
-        next()
+if (env.NODE_ENV === "production") {
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../../frontEnd/dist/index.html"))
     })
 }
 
