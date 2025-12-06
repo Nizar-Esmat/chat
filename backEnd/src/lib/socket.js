@@ -1,10 +1,8 @@
 import { Server } from "socket.io"
 import http from "http"
 import express from "express"
-import dotnv from "dotenv"
 import { socketAuthMiddleware } from "../middleware/sokcet.middleware.js"
-
-dotnv.config()
+import { env } from "../config/env.js"
 
 
 const app = express()
@@ -12,7 +10,7 @@ const httpServer = http.createServer(app)
 
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        origin: env.CLIENT_URL,
         methods: ["GET", "POST"],
         credentials: true
     }

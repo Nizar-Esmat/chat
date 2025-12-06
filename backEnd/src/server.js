@@ -1,20 +1,15 @@
 import express from "express"
-import dotenv from "dotenv"
 import path from "path"
 import { ConnectDb } from "../lib/db.js";
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import { app, httpServer } from "./lib/socket.js";
-
-
+import { env } from "./config/env.js";
 
 const __dirname = path.resolve();
-dotenv.config()
-
-const PORT = 5000;
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: env.CLIENT_URL,
     credentials: true
 }))
 app.use(express.json({limit: '10mb'}))
@@ -40,7 +35,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 ConnectDb(()=>{
-    httpServer.listen(PORT, () => {
-        console.log("server is running on port " + PORT);
+    httpServer.listen(env.PORT, () => {
+        console.log("server is running on port " + env.PORT);
     })
 })

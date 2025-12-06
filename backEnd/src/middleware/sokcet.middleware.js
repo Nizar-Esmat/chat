@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { env } from "../config/env.js";
 
 export const socketAuthMiddleware = async (socket, next) => {
     try {
@@ -18,7 +19,7 @@ export const socketAuthMiddleware = async (socket, next) => {
             return next(new Error("No token found"));
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, env.JWT_SECRET);
         const user = await User.findById(decoded.id).select("-password");
 
         if (!user) {
