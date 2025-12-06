@@ -5,7 +5,7 @@ import { MessageCircleIcon, LockIcon, MailIcon, UserIcon, LoaderIcon } from "luc
 import { Link } from "react-router";
 
 function SignUpPage() {
-  const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ fullName: "", email: "", password: ""  , passwordConfirmation:""});
   const { signup, isSigningUp } = useAuthStore();
 
   const handleSubmit = (e) => {
@@ -74,6 +74,21 @@ function SignUpPage() {
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className="input"
                         placeholder="Enter your password"
+                      />
+                    </div>
+                  </div>
+                    {/* CONFIRM PASSWORD INPUT */}
+                  <div>
+                    <label className="auth-input-label">Confirm Password</label>
+                    <div className="relative">
+                      <LockIcon className="auth-input-icon" />
+
+                      <input
+                        type="password"
+                        value={formData.passwordConfirmation}
+                        onChange={(e) => setFormData({ ...formData, passwordConfirmation: e.target.value })}
+                        className="input"
+                        placeholder="Confirm your password"
                       />
                     </div>
                   </div>

@@ -2,7 +2,7 @@ import { validationResult } from "express-validator";
 import Massage from "../models/massage.model.js";
 import User from "../models/user.model.js";
 import cloudnary from "../lib/cloudinary.js";
-import { getReceiverSocketId } from "../lib/socket.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 
 const getAllContacts = async (req, res) => {

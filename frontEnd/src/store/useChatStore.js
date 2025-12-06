@@ -39,7 +39,7 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/chats")
-            console.log(res.data)
+            console.log("res.data.partners" , res.data.partners)
             set({ chats: res.data.partners, isUsersLoading: false })
         } catch (error) {
             console.log(error)
@@ -72,8 +72,7 @@ const useChatStore = create((set, get) => ({
             createdAt: new Date().toISOString(),
             isTemp: true
         }
-        console.log("messages : " ,messages)
-        console.log("tempMessage : " ,tempMessage)
+
         set({ messages: [...messages , tempMessage] })
         try {
             const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
