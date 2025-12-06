@@ -88,6 +88,8 @@ const useChatStore = create((set, get) => ({
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
         socket?.on("newMassage", ({ newMassage }) => {
+            const isMesssageSentFromSelectedUser = newMassage.senderId === selectedUser._id ;
+            if (!isMesssageSentFromSelectedUser) return;
             const currentMessages = get().messages;
             set({ messages: [...currentMessages, newMassage] });
             if (isSoundEnabled) {
