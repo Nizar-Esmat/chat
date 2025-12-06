@@ -21,14 +21,17 @@ app.use("/api/auth", authRoutes)
 import massagesRoute from "./routes/massage.route.js"
 app.use("/api/massage", massagesRoute)
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, "../../frontEnd/dist")))
-
-// SPA fallback for non-API routes in production
+// Serve frontend in production
 if (env.NODE_ENV === "production") {
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../../frontEnd/dist/index.html"))
-    })
+    const frontendPath = path.join(__dirname, "../../frontEnd/dist");
+    
+    // Serve static files
+    app.use(express.static(frontendPath));
+    
+    // SPA fallback - serve index.html for all non-API routes
+    app.get(/^(?!\/api).*/, (req, res) => {
+        res.sendFile(path.join(frontendPath, "index.html"));
+    });
 }
 
 ConnectDb(()=>{
