@@ -68,7 +68,7 @@ const useChatStore = create((set, get) => ({
             senderId: authUser._id,
             receiverId: selectedUser._id,
             text: massageData.text,
-            image: massageData.image,
+            imageUrl: massageData.imageUrl,
             createdAt: new Date().toISOString(),
             isTemp: true
         }

@@ -22,7 +22,7 @@ function MessageInput() {
 
     sendMessage({
       text: text.trim(),
-      image: imagePreview,
+      imageUrl: imagePreview,
     });
     setText("");
     setImagePreview("");

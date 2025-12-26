@@ -21,9 +21,7 @@ route.post("/sendMassage/:reseiverId", [
 
     body("imageUrl")
         .optional()
-        .trim()
-        .isURL()
-        .withMessage("Image URL should  be valid URL"),
+        .trim(),
 
 
     body().custom((value, { req }) => {

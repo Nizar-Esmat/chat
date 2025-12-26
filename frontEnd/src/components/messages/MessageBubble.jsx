@@ -24,7 +24,7 @@ function MessageBubble({ message, isOwnMessage, onEdit, onDelete }) {
                 />
             ) : (
                 <>
-                    <MessageContent text={message.text} image={message.image} />
+                    <MessageContent text={message.text} image={message.imageUrl} />
                     <MessageFooter
                         isEdited={message.isEdited}
                         editedAt={message.editedAt}
