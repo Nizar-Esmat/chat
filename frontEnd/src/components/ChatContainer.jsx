@@ -5,6 +5,7 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
+import MessageActionsDropdown from "./MessageActionsDropdown";
 
 function ChatContainer() {
   const {
@@ -55,6 +56,14 @@ function ChatContainer() {
                         : "bg-slate-800/90 text-slate-100 border-slate-600/40"
                     }`}
                   >
+                    {isOwnMessage && (
+                      <div className="absolute -top-3 -right-3">
+                        <MessageActionsDropdown
+                          onEdit={() => console.log("Edit message", msg._id)}
+                          onDelete={() => console.log("Delete message", msg._id)}
+                        />
+                      </div>
+                    )}
                     {msg.image && (
                       <img
                         src={msg.image}
