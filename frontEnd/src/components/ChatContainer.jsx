@@ -5,7 +5,7 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
-import MessageActionsDropdown from "./MessageActionsDropdown";
+import MessageBubble from "./messages/MessageBubble";
 
 function ChatContainer() {
   const {
@@ -49,40 +49,12 @@ function ChatContainer() {
                   key={msg._id}
                   className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={`relative max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg border backdrop-blur-sm transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${
-                      isOwnMessage
-                        ? "bg-linear-to-r from-cyan-500 to-sky-500 text-white border-cyan-300/40"
-                        : "bg-slate-800/90 text-slate-100 border-slate-600/40"
-                    }`}
-                  >
-                    {isOwnMessage && (
-                      <div className="absolute -top-3 -right-3">
-                        <MessageActionsDropdown
-                          onEdit={() => console.log("Edit message", msg._id)}
-                          onDelete={() => console.log("Delete message", msg._id)}
-                        />
-                      </div>
-                    )}
-                    {msg.image && (
-                      <img
-                        src={msg.image}
-                        alt="Shared"
-                        className="rounded-xl h-48 w-full object-cover mb-2"
-                      />
-                    )}
-                    {msg.text && (
-                      <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
-                        {msg.text}
-                      </p>
-                    )}
-                    <p className="mt-2 text-[11px] opacity-80 flex justify-end">
-                      {new Date(msg.createdAt).toLocaleTimeString(undefined, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
+                  <MessageBubble
+                    message={msg}
+                    isOwnMessage={isOwnMessage}
+                    onEdit={() => console.log("Edit message", msg._id)}
+                    onDelete={() => console.log("Delete message", msg._id)}
+                  />
                 </div>
               );
             })} 
