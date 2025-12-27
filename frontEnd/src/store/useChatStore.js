@@ -39,7 +39,7 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/chats")
-            console.log("res.data.partners" , res.data.partners)
+            console.log("res.data.partners", res.data.partners)
             set({ chats: res.data.partners, isUsersLoading: false })
         } catch (error) {
             console.log(error)
@@ -68,12 +68,12 @@ const useChatStore = create((set, get) => ({
             senderId: authUser._id,
             receiverId: selectedUser._id,
             text: massageData.text,
-            image: massageData.image,
+            imageUrl: massageData.imageUrl,
             createdAt: new Date().toISOString(),
             isTemp: true
         }
 
-        set({ messages: [...messages , tempMessage] })
+        set({ messages: [...messages, tempMessage] })
         try {
             const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
             console.log(res.data)
@@ -88,7 +88,7 @@ const useChatStore = create((set, get) => ({
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
         socket?.on("newMassage", ({ newMassage }) => {
-            const isMesssageSentFromSelectedUser = newMassage.senderId === selectedUser._id ;
+            const isMesssageSentFromSelectedUser = newMassage.senderId === selectedUser._id;
             if (!isMesssageSentFromSelectedUser) return;
             const currentMessages = get().messages;
             set({ messages: [...currentMessages, newMassage] });
@@ -101,9 +101,64 @@ const useChatStore = create((set, get) => ({
             }
         });
     },
-    unsubscribeFromMessages : ()=>{
+    unsubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket;
         socket?.off("newMassage");
+    },
+    editMassage: async (messageId, updatedData) => {
+        const { messages } = get();
+        set({
+            messages: messages.map(msg =>
+                msg._id === messageId ? { ...msg, ...updatedData } : msg
+            )
+        });
+        try {
+            const res = await api.patch(`/massage/editMassage/${messageId}`, updatedData);
+            
+
+            const socket = useAuthStore.getState().socket;
+            socket?.on("editMassage", ({ updatedMassage }) => {
+                const currentMessages = get().messages;
+                set({
+                    messages: currentMessages.map(msg =>
+                        msg._id === updatedMassage._id ? updatedMassage : msg
+                    )
+                });
+            });
+            set({
+                messages: messages.map(msg =>
+                    msg._id === messageId ? res.data.massage : msg
+                )
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    deleteMassage: async (messageId) => {
+        const { messages } = get();
+        try {
+            await api.delete(`/massage/deleteMassage/${messageId}`);
+
+            
+
+            const socket = useAuthStore.getState().socket;
+            socket?.on("deleteMassage", ({ massageId , massage }) => {
+                const currentMessages = get().messages;
+                set({
+                    messages: currentMessages.map(msg =>
+                        msg._id === massageId ? massage : msg
+                    )
+                });
+            });
+
+            set({
+                messages: messages.map(msg =>
+                    msg._id === messageId ? { ...msg, isDeleted: true } : msg
+                )
+            });
+        } catch (error) {
+            console.log(error);
+        }
     }
 }))
 
