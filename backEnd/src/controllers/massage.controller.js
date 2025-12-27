@@ -26,13 +26,13 @@ const ChatPartners = async (req, res) => {
         });
         const partnerChat = [...new Set(massages.map(massage => {
             return massage.senderId.toString() == userId.toString() ? massage.reseiverId.toString() : massage.senderId.toString();
-    }))]
+        }))]
 
-    const filteredPartners = await User.find({ _id: { $in: partnerChat } }).select(["-password"]);
-    res.status(200).json({ msg: "chat partners fetched successfully", partners: filteredPartners });
-} catch (error) {
-    console.log(error);
-}
+        const filteredPartners = await User.find({ _id: { $in: partnerChat } }).select(["-password"]);
+        res.status(200).json({ msg: "chat partners fetched successfully", partners: filteredPartners });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 const getMassagesByUserId = async (req, res) => {
@@ -77,7 +77,7 @@ const sendMassage = async (req, res) => {
         await newMassage.save()
 
         const receiverSocketId = getReceiverSocketId(reseiverId);
-        if(receiverSocketId){
+        if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMassage", { newMassage });
         }
         res.status(201).json({ msg: "massage sent successfully", massage: newMassage });
@@ -88,4 +88,76 @@ const sendMassage = async (req, res) => {
     }
 }
 
-export { getAllContacts, ChatPartners, getMassagesByUserId, sendMassage };
+const deleteMassage = async (req, res) => {
+    try {
+        const massageId = req.params.id;
+        const massage = req.massage;
+
+
+        const deleteMassage = await Massage.findByIdAndUpdate(
+            massageId,
+            { isDeleted: true, deletedAt: new Date() },
+            { new: true }
+        );
+
+        const receiverSocketId = getReceiverSocketId(massage.reseiverId.toString());
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("deleteMassage", { massageId, massage: deleteMassage });
+        }
+
+        res.status(200).json({ msg: "massage deleted successfully", massage: deleteMassage });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Internal server error" });
+    }
+}
+
+const editMassage = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const massageId = req.params.id;
+        const { text = "", imageUrl = "" } = req.body;
+        const massage = req.massage;
+
+        console.log("imageUrl" , imageUrl);
+
+
+        let uploadImage = massage.imageUrl; 
+        if (imageUrl) {
+            if (massage.imageUrl) { 
+                const publicId = massage.imageUrl.split('/').pop().split('.')[0];
+                await cloudnary.uploader.destroy(publicId);
+            }
+            const uploadResult = await cloudnary.uploader.upload(imageUrl);
+            uploadImage = uploadResult.secure_url;
+        }
+
+        const updatedMassage = await Massage.findByIdAndUpdate(
+            massageId,
+            { 
+                text: text || massage.text, 
+                imageUrl: uploadImage,
+                isEdited: true, 
+                editedAt: new Date() 
+            },
+            { new: true }
+        );
+
+        const receiverSocketId = getReceiverSocketId(massage.reseiverId.toString());
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("editMassage", { updatedMassage });
+        }
+
+        res.status(200).json({ msg: "massage updated successfully", massage: updatedMassage });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Internal server error" });
+    }
+}
+
+export { getAllContacts, ChatPartners, getMassagesByUserId, sendMassage, deleteMassage, editMassage };

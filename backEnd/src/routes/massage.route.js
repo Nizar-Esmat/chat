@@ -1,6 +1,7 @@
 import express from "express"
-import { ChatPartners, getAllContacts, getMassagesByUserId, sendMassage } from "../controllers/massage.controller.js"
+import { ChatPartners, deleteMassage, editMassage, getAllContacts, getMassagesByUserId, sendMassage } from "../controllers/massage.controller.js"
 import { is_auth } from "../middleware/auth.middleware.js"
+import { verifyMessageOwnership } from "../middleware/massage.middleware.js"
 import { body } from "express-validator"
 import { arcjetProtection } from "../middleware/arcjet.middleware.js"
 const route = express.Router()
@@ -20,9 +21,7 @@ route.post("/sendMassage/:reseiverId", [
 
     body("imageUrl")
         .optional()
-        .trim()
-        .isURL()
-        .withMessage("Image URL should  be valid URL"),
+        .trim(),
 
 
     body().custom((value, { req }) => {
@@ -39,5 +38,20 @@ route.post("/sendMassage/:reseiverId", [
 route.get("/", (req, res) => {
     res.send("massage route is working")
 })
+
+
+route.patch("/editMassage/:id", 
+    verifyMessageOwnership,
+    [
+        body("text")
+            .optional()
+            .trim()
+            .isLength({ max: 1000 })
+            .withMessage("Text message should not exceed 1000 characters"),
+    ], 
+    editMassage
+)
+
+route.delete("/deleteMassage/:id", verifyMessageOwnership, deleteMassage)
 
 export default route;
