@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
@@ -6,6 +6,7 @@ import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 import MessageBubble from "./messages/MessageBubble";
+import EditMessageModal from "./messages/EditMessageModal";
 
 function ChatContainer() {
   const {
@@ -15,9 +16,12 @@ function ChatContainer() {
     isMessagesLoading,
     subscribeToMessages,
     unsubscribeFromMessages,
+    editMassage,
+    deleteMassage,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
+  const [editingMessage, setEditingMessage] = useState(null);
 
   console.log("messages" , messages)
 
@@ -52,8 +56,8 @@ function ChatContainer() {
                   <MessageBubble
                     message={msg}
                     isOwnMessage={isOwnMessage}
-                    onEdit={() => console.log("Edit message", msg._id)}
-                    onDelete={() => console.log("Delete message", msg._id)}
+                    onEdit={() => setEditingMessage(msg)}
+                    onDelete={() => deleteMassage(msg._id)}
                   />
                 </div>
               );
@@ -69,6 +73,17 @@ function ChatContainer() {
       </div>
 
       <MessageInput />
+      
+      {editingMessage && (
+        <EditMessageModal
+          message={editingMessage}
+          onSave={(updatedData) => {
+            editMassage(editingMessage._id, updatedData);
+            setEditingMessage(null);
+          }}
+          onCancel={() => setEditingMessage(null)}
+        />
+      )}
     </>
   );
 }

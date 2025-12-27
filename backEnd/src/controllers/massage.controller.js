@@ -124,15 +124,27 @@ const editMassage = async (req, res) => {
         const { text = "", imageUrl = "" } = req.body;
         const massage = req.massage;
 
-        let uploadImage = "";
-        if (massage.imageUrl && imageUrl) {
-            await cloudnary.uploader.destroy(massage.imageUrl);
-            uploadImage = await cloudnary.uploader.upload(imageUrl)
-            uploadImage = uploadImage.secure_url
+        console.log("imageUrl" , imageUrl);
+
+
+        let uploadImage = massage.imageUrl; 
+        if (imageUrl) {
+            if (massage.imageUrl) { 
+                const publicId = massage.imageUrl.split('/').pop().split('.')[0];
+                await cloudnary.uploader.destroy(publicId);
+            }
+            const uploadResult = await cloudnary.uploader.upload(imageUrl);
+            uploadImage = uploadResult.secure_url;
         }
+
         const updatedMassage = await Massage.findByIdAndUpdate(
             massageId,
-            { text: text || massage.text, imageUrl: uploadImage || massage.imageUrl , isEdited: true, editedAt: new Date() },
+            { 
+                text: text || massage.text, 
+                imageUrl: uploadImage,
+                isEdited: true, 
+                editedAt: new Date() 
+            },
             { new: true }
         );
 
