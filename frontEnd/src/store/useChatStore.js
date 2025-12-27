@@ -107,8 +107,14 @@ const useChatStore = create((set, get) => ({
     },
     editMassage: async (messageId, updatedData) => {
         const { messages } = get();
+        set({
+            messages: messages.map(msg =>
+                msg._id === messageId ? { ...msg, ...updatedData } : msg
+            )
+        });
         try {
             const res = await api.patch(`/massage/editMassage/${messageId}`, updatedData);
+            
 
             const socket = useAuthStore.getState().socket;
             socket?.on("editMassage", ({ updatedMassage }) => {
