@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import api from './api'
 import { useAuthStore } from './useAuthStore'
+import toast from 'react-hot-toast'
 
 const notificationSound = new Audio('/sounds/notification.mp3');
 const useChatStore = create((set, get) => ({
@@ -28,10 +29,9 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/AllContacts")
-            console.log(res.data)
             set({ allContacts: res.data, isUsersLoading: false })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load contacts")
             set({ isUsersLoading: false })
         }
     },
@@ -39,10 +39,9 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/chats")
-            console.log("res.data.partners", res.data.partners)
             set({ chats: res.data.partners, isUsersLoading: false })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load chats")
             set({ isUsersLoading: false })
         }
     }
@@ -53,7 +52,7 @@ const useChatStore = create((set, get) => ({
             const res = await api.get(`/massage/${userId}`)
             set({ messages: res.data.massages })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load messages")
         } finally {
             set({ isMassageLoading: false })
         }
@@ -76,7 +75,6 @@ const useChatStore = create((set, get) => ({
         set({ messages: [...messages, tempMessage] })
         try {
             const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
-            console.log(res.data)
             set({ messages: messages.filter(msg => msg._id !== tempId).concat(res.data.massage) })
         } catch (error) {
             set({ messages: messages.filter(msg => msg._id !== tempId) })
@@ -87,6 +85,7 @@ const useChatStore = create((set, get) => ({
         const { selectedUser, isSoundEnabled } = get();
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
+
         socket?.on("newMassage", ({ newMassage }) => {
             const isMesssageSentFromSelectedUser = newMassage.senderId === selectedUser._id;
             if (!isMesssageSentFromSelectedUser) return;
@@ -100,10 +99,31 @@ const useChatStore = create((set, get) => ({
                     });
             }
         });
+        socket?.on("editMassage", ({ updatedMassage }) => {
+            const currentMessages = get().messages;
+            set({
+                messages: currentMessages.map(msg =>
+                    msg._id === updatedMassage._id ? updatedMassage : msg
+                )
+            });
+        });
+
+        socket?.on("deleteMassage", ({ massageId, massage }) => {
+            const currentMessages = get().messages;
+            set({
+                messages: currentMessages.map(msg =>
+                    msg._id === massageId ? massage : msg
+                )
+            });
+        });
+
+
     },
     unsubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket;
         socket?.off("newMassage");
+        socket?.off("editMassage");
+        socket?.off("deleteMassage");
     },
     editMassage: async (messageId, updatedData) => {
         const { messages } = get();
@@ -114,50 +134,26 @@ const useChatStore = create((set, get) => ({
         });
         try {
             const res = await api.patch(`/massage/editMassage/${messageId}`, updatedData);
-            
-
-            const socket = useAuthStore.getState().socket;
-            socket?.on("editMassage", ({ updatedMassage }) => {
-                const currentMessages = get().messages;
-                set({
-                    messages: currentMessages.map(msg =>
-                        msg._id === updatedMassage._id ? updatedMassage : msg
-                    )
-                });
-            });
             set({
                 messages: messages.map(msg =>
                     msg._id === messageId ? res.data.massage : msg
                 )
             });
         } catch (error) {
-            console.log(error);
+            toast.error("Failed to edit message");
         }
     },
     deleteMassage: async (messageId) => {
         const { messages } = get();
         try {
             await api.delete(`/massage/deleteMassage/${messageId}`);
-
-            
-
-            const socket = useAuthStore.getState().socket;
-            socket?.on("deleteMassage", ({ massageId , massage }) => {
-                const currentMessages = get().messages;
-                set({
-                    messages: currentMessages.map(msg =>
-                        msg._id === massageId ? massage : msg
-                    )
-                });
-            });
-
             set({
                 messages: messages.map(msg =>
                     msg._id === messageId ? { ...msg, isDeleted: true } : msg
                 )
             });
         } catch (error) {
-            console.log(error);
+            toast.error("Failed to delete message");
         }
     }
 }))
