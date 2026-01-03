@@ -76,7 +76,6 @@ const useChatStore = create((set, get) => ({
         set({ messages: [...messages, tempMessage] })
         try {
             const res = await api.post(`/massage/sendMassage/${selectedUser._id}`, massageData)
-            console.log(res.data)
             set({ messages: messages.filter(msg => msg._id !== tempId).concat(res.data.massage) })
         } catch (error) {
             set({ messages: messages.filter(msg => msg._id !== tempId) })
@@ -87,6 +86,7 @@ const useChatStore = create((set, get) => ({
         const { selectedUser, isSoundEnabled } = get();
         if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
+
         socket?.on("newMassage", ({ newMassage }) => {
             const isMesssageSentFromSelectedUser = newMassage.senderId === selectedUser._id;
             if (!isMesssageSentFromSelectedUser) return;
@@ -100,10 +100,31 @@ const useChatStore = create((set, get) => ({
                     });
             }
         });
+        socket?.on("editMassage", ({ updatedMassage }) => {
+            const currentMessages = get().messages;
+            set({
+                messages: currentMessages.map(msg =>
+                    msg._id === updatedMassage._id ? updatedMassage : msg
+                )
+            });
+        });
+
+        socket?.on("deleteMassage", ({ massageId, massage }) => {
+            const currentMessages = get().messages;
+            set({
+                messages: currentMessages.map(msg =>
+                    msg._id === massageId ? massage : msg
+                )
+            });
+        });
+
+
     },
     unsubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket;
         socket?.off("newMassage");
+        socket?.off("editMassage");
+        socket?.off("deleteMassage");
     },
     editMassage: async (messageId, updatedData) => {
         const { messages } = get();
@@ -114,17 +135,6 @@ const useChatStore = create((set, get) => ({
         });
         try {
             const res = await api.patch(`/massage/editMassage/${messageId}`, updatedData);
-            
-
-            const socket = useAuthStore.getState().socket;
-            socket?.on("editMassage", ({ updatedMassage }) => {
-                const currentMessages = get().messages;
-                set({
-                    messages: currentMessages.map(msg =>
-                        msg._id === updatedMassage._id ? updatedMassage : msg
-                    )
-                });
-            });
             set({
                 messages: messages.map(msg =>
                     msg._id === messageId ? res.data.massage : msg
@@ -138,19 +148,6 @@ const useChatStore = create((set, get) => ({
         const { messages } = get();
         try {
             await api.delete(`/massage/deleteMassage/${messageId}`);
-
-            
-
-            const socket = useAuthStore.getState().socket;
-            socket?.on("deleteMassage", ({ massageId , massage }) => {
-                const currentMessages = get().messages;
-                set({
-                    messages: currentMessages.map(msg =>
-                        msg._id === massageId ? massage : msg
-                    )
-                });
-            });
-
             set({
                 messages: messages.map(msg =>
                     msg._id === messageId ? { ...msg, isDeleted: true } : msg
