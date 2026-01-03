@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import api from "./api.js";
 import { io } from "socket.io-client"
+import toast from "react-hot-toast"
 
 
 export const useAuthStore = create((set, get) => ({
@@ -18,7 +19,6 @@ export const useAuthStore = create((set, get) => ({
             set({ authUser: res.data.user });
             get().connectSocket();
         } catch (error) {
-            console.log("Error in authCheck:", error);
             set({ authUser: null });
         } finally {
             set({ isCheckingAuth: false });
@@ -33,7 +33,7 @@ export const useAuthStore = create((set, get) => ({
 
             get().connectSocket();
         } catch (error) {
-            console.log("Error in signup:", error);
+            toast.error(error.response?.data?.msg || "Signup failed");
         } finally {
             set({ isSigningUp: false });
         }
@@ -44,11 +44,9 @@ export const useAuthStore = create((set, get) => ({
         try {
             const res = await api.post("/auth/login", data);
             set({ authUser: res.data.user });
-            console.log(res.data.user);
-
             get().connectSocket()
         } catch (error) {
-            console.log("Error in login:", error);
+            toast.error(error.response?.data?.msg || "Login failed");
         } finally {
             set({ isLoggingIn: false });
         }
@@ -59,9 +57,8 @@ export const useAuthStore = create((set, get) => ({
             await api.post("/auth/logout");
             set({ authUser: null });
             get().disconnectSocket()
-            console.log("Logout successful");
         } catch (error) {
-            console.log("Logout error:", error);
+            toast.error("Logout failed");
         }
     },
 
@@ -70,40 +67,23 @@ export const useAuthStore = create((set, get) => ({
         try {
             const res = await api.put("/auth/updateProfile", data);
             set({ authUser: res.data.user });
-            console.log("Profile updated successfully");
+            toast.success("Profile updated successfully");
         } catch (error) {
-            console.log("Error in update profile:", error);
+            toast.error(error.response?.data?.msg || "Failed to update profile");
         } finally {
             set({ isUpdatingProfile: false });
         }
     },
     connectSocket: () => {
         const { authUser, socket } = get()
-        if (!authUser) {
-            console.log("Cannot connect socket: No authenticated user");
-            return
-        }
-        
-        if (socket?.connected) {
-            console.log("Socket already connected");
-            return
-        }
+        if (!authUser) return
+        if (socket?.connected) return
 
-        console.log("Connecting to socket...");
         const newSocket = io(import.meta.env.VITE_SOCKET_URL, { 
             withCredentials: true 
         })
-        
-        newSocket.on("connect", () => {
-            console.log("Socket connected successfully");
-        })
-        
-        newSocket.on("connect_error", (error) => {
-            console.error("Socket connection error:", error);
-        })
 
         newSocket.on("getOnlineUsers", (userIds) => {
-            console.log("Online users updated:", userIds);
             set({ onlineUsers: userIds });
         })
         
@@ -113,7 +93,6 @@ export const useAuthStore = create((set, get) => ({
         const { socket } = get()
         if (socket?.connected) {
             socket.disconnect()
-            console.log("Socket disconnected");
         }
         set({ socket: null })
     }

@@ -24,7 +24,6 @@ function EditMessageModal({ message, onSave, onCancel }) {
             if (imageFile) {
                 updateData.imageUrl = imagePreview;
             }
-            console.log("updateData" , updateData)
             onSave(updateData);
         }
     };

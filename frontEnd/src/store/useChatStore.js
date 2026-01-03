@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import api from './api'
 import { useAuthStore } from './useAuthStore'
+import toast from 'react-hot-toast'
 
 const notificationSound = new Audio('/sounds/notification.mp3');
 const useChatStore = create((set, get) => ({
@@ -28,10 +29,9 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/AllContacts")
-            console.log(res.data)
             set({ allContacts: res.data, isUsersLoading: false })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load contacts")
             set({ isUsersLoading: false })
         }
     },
@@ -39,10 +39,9 @@ const useChatStore = create((set, get) => ({
         set({ isUsersLoading: true })
         try {
             const res = await api.get("/massage/chats")
-            console.log("res.data.partners", res.data.partners)
             set({ chats: res.data.partners, isUsersLoading: false })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load chats")
             set({ isUsersLoading: false })
         }
     }
@@ -53,7 +52,7 @@ const useChatStore = create((set, get) => ({
             const res = await api.get(`/massage/${userId}`)
             set({ messages: res.data.massages })
         } catch (error) {
-            console.log(error)
+            toast.error("Failed to load messages")
         } finally {
             set({ isMassageLoading: false })
         }
@@ -141,7 +140,7 @@ const useChatStore = create((set, get) => ({
                 )
             });
         } catch (error) {
-            console.log(error);
+            toast.error("Failed to edit message");
         }
     },
     deleteMassage: async (messageId) => {
@@ -154,7 +153,7 @@ const useChatStore = create((set, get) => ({
                 )
             });
         } catch (error) {
-            console.log(error);
+            toast.error("Failed to delete message");
         }
     }
 }))

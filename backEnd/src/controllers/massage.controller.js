@@ -100,11 +100,12 @@ const deleteMassage = async (req, res) => {
             { new: true }
         );
 
+        
+
         const receiverSocketId = getReceiverSocketId(massage.reseiverId.toString());
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("deleteMassage", { massageId, massage: deleteMassage });
         }
-
         res.status(200).json({ msg: "massage deleted successfully", massage: deleteMassage });
     } catch (error) {
         console.log(error);
@@ -123,9 +124,6 @@ const editMassage = async (req, res) => {
         const massageId = req.params.id;
         const { text = "", imageUrl = "" } = req.body;
         const massage = req.massage;
-
-        console.log("imageUrl" , imageUrl);
-
 
         let uploadImage = massage.imageUrl; 
         if (imageUrl) {

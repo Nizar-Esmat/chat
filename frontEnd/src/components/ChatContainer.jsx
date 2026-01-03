@@ -23,7 +23,6 @@ function ChatContainer() {
   const messageEndRef = useRef(null);
   const [editingMessage, setEditingMessage] = useState(null);
 
-  console.log("messages" , messages)
 
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
