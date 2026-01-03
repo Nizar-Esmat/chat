@@ -59,19 +59,28 @@ const sendMassage = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         const reseiverId = req.params.reseiverId;
-        const { text = "", imageUrl = "" } = req.body;
+        const { text = "", imageUrl = "", voiceUrl = "", voiceDuration = 0 } = req.body;
         const senderId = req.user.id;
 
         let uploadImage = "";
         if (imageUrl) {
-            uploadImage = await cloudnary.uploader.upload(imageUrl);
+            const result = await cloudnary.uploader.upload(imageUrl);
+            uploadImage = result.secure_url;
+        }
+
+        let uploadVoice = "";
+        if (voiceUrl) {
+            const result = await cloudnary.uploader.upload(voiceUrl, { resource_type: "video" });
+            uploadVoice = result.secure_url;
         }
 
         const newMassage = new Massage({
             senderId,
             reseiverId,
             text,
-            imageUrl: uploadImage.secure_url
+            imageUrl: uploadImage,
+            voiceUrl: uploadVoice,
+            voiceDuration
         });
 
         await newMassage.save()
@@ -100,7 +109,7 @@ const deleteMassage = async (req, res) => {
             { new: true }
         );
 
-        
+
 
         const receiverSocketId = getReceiverSocketId(massage.reseiverId.toString());
         if (receiverSocketId) {
@@ -125,9 +134,14 @@ const editMassage = async (req, res) => {
         const { text = "", imageUrl = "" } = req.body;
         const massage = req.massage;
 
-        let uploadImage = massage.imageUrl; 
+        // Voice messages cannot be edited
+        if (massage.voiceUrl) {
+            return res.status(400).json({ msg: "Cannot edit voice messages" });
+        }
+
+        let uploadImage = massage.imageUrl;
         if (imageUrl) {
-            if (massage.imageUrl) { 
+            if (massage.imageUrl) {
                 const publicId = massage.imageUrl.split('/').pop().split('.')[0];
                 await cloudnary.uploader.destroy(publicId);
             }
@@ -137,11 +151,11 @@ const editMassage = async (req, res) => {
 
         const updatedMassage = await Massage.findByIdAndUpdate(
             massageId,
-            { 
-                text: text || massage.text, 
+            {
+                text: text || massage.text,
                 imageUrl: uploadImage,
-                isEdited: true, 
-                editedAt: new Date() 
+                isEdited: true,
+                editedAt: new Date()
             },
             { new: true }
         );

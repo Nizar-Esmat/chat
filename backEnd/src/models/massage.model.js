@@ -19,8 +19,16 @@ const massageSchema = new mongoose.Schema({
     imageUrl: {
         type: String
     }
-
     ,
+
+
+    voiceUrl: {
+        type: String
+    },
+    voiceDuration: {
+        type: Number,
+        default: 0
+    },
     isEdited: {
         type: Boolean,
         default: false
