@@ -25,9 +25,9 @@ route.post("/sendMassage/:reseiverId", [
 
 
     body().custom((value, { req }) => {
-        const { text, imageUrl } = req.body;
-        if (!text && !imageUrl) {
-            throw new Error("Either text or imageUrl must be provided");
+        const { text, imageUrl , voiceUrl } = req.body;
+        if (!text && !imageUrl , !voiceUrl) {
+            throw new Error("Either text ,  imageUrl or voiceUrl must be provided");
         }
         return true;
     })

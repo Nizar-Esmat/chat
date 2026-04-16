@@ -31,14 +31,16 @@ function MessageActionsDropdown({ onEdit, onDelete }) {
 
             {isOpen && (
                 <div className="absolute right-0 z-20 mt-2 w-32 origin-top-right rounded-xl bg-slate-900/95 py-1 shadow-xl ring-1 ring-slate-700/60 backdrop-blur">
-                    <button
-                        type="button"
-                        onClick={handleEdit}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-left text-xs text-slate-100 hover:bg-slate-800/80"
-                    >
-                        <Edit2 className="h-3 w-3" />
-                        Edit
-                    </button>
+                    {onEdit && (
+                        <button
+                            type="button"
+                            onClick={handleEdit}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-left text-xs text-slate-100 hover:bg-slate-800/80"
+                        >
+                            <Edit2 className="h-3 w-3" />
+                            Edit
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={handleDelete}

@@ -70,7 +70,10 @@ const sendMassage = async (req, res) => {
 
         let uploadVoice = "";
         if (voiceUrl) {
-            const result = await cloudnary.uploader.upload(voiceUrl, { resource_type: "video" });
+            const result = await cloudnary.uploader.upload(voiceUrl, { 
+                resource_type: "video",
+                folder: "voice_messages"
+            });
             uploadVoice = result.secure_url;
         }
 
