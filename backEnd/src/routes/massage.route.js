@@ -23,11 +23,19 @@ route.post("/sendMassage/:reseiverId", [
         .optional()
         .trim(),
 
+    body("voiceUrl")
+        .optional()
+        .trim(),
+
+    body("voiceDuration")
+        .optional()
+        .isNumeric()
+        .withMessage("voiceDuration must be a number"),
 
     body().custom((value, { req }) => {
-        const { text, imageUrl , voiceUrl } = req.body;
-        if (!text && !imageUrl , !voiceUrl) {
-            throw new Error("Either text ,  imageUrl or voiceUrl must be provided");
+        const { text, imageUrl, voiceUrl } = req.body;
+        if (!text && !imageUrl && !voiceUrl) {
+            throw new Error("Either text, imageUrl, or voiceUrl must be provided");
         }
         return true;
     })

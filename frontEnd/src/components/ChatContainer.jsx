@@ -13,7 +13,7 @@ function ChatContainer() {
     selectedUser,
     getMessagesByUserId,
     messages,
-    isMessagesLoading,
+    isMassageLoading,
     subscribeToMessages,
     unsubscribeFromMessages,
     editMassage,
@@ -42,7 +42,7 @@ function ChatContainer() {
     <>
       <ChatHeader />
       <div className="flex-1 px-6 overflow-y-auto py-8">
-        {messages.length > 0 && !isMessagesLoading ? (
+        {messages.length > 0 && !isMassageLoading ? (
           <div className="max-w-3xl mx-auto space-y-4">
             {messages.map((msg) => {
               const isOwnMessage = msg.senderId === authUser._id;
@@ -64,7 +64,7 @@ function ChatContainer() {
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
-        ) : isMessagesLoading ? (
+        ) : isMassageLoading ? (
           <MessagesLoadingSkeleton />
         ) : (
           <NoChatHistoryPlaceholder name={selectedUser.fullName} />
