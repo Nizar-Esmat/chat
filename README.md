@@ -8,13 +8,14 @@ A modern, full-stack real-time chat application built with the MERN stack, featu
 
 - 🔐 **Secure Authentication** - JWT-based auth with HTTP-only cookies
 - 💬 **Real-Time Messaging** - Instant message delivery with Socket.IO
-- ✏️ **Edit Messages** - Edit your sent messages with timestamp tracking
+- 🎤 **Voice Messages** - Record and share voice messages (cannot be edited)
+- ✏️ **Edit Messages** - Edit your sent text/image messages with timestamp tracking
 - 🗑️ **Delete Messages** - Soft delete messages (marked as deleted, not removed)
 - 👥 **Online Status** - See who's currently online
 - 🖼️ **Image Sharing** - Upload and share images with fullscreen preview
 - 🔔 **Sound Notifications** - Customizable notification sounds
 - ⌨️ **Keyboard Sounds** - Optional typing sound effects
-- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS
+- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS & DaisyUI
 - 🔒 **Rate Limiting** - Protected against spam with Arcjet
 - 📧 **Email Integration** - Notifications via Resend
 
@@ -88,18 +89,28 @@ NizarChat/
 
 ## 🎯 Key Features
 
+### Voice Messaging
+- Click to record voice messages (pause/resume supported)
+- Waveform visualization during recording
+- Audio playback with progress bar and seek controls
+- Voice messages cannot be edited (delete only)
+- Cloudinary storage for reliable audio delivery
+
 ### Message Editing & Deletion
-- Edit your sent messages (text and images)
+- Edit your sent text and image messages
 - Soft delete with "This message was deleted" placeholder
 - Timestamps track edits and deletions
 - Only message sender can edit/delete (backend verification)
+- Voice messages support deletion but not editing
 
 ### Message Display
-- Clean bubble UI with sender alignment
+- Clean bubble UI with sender alignment (DaisyUI chat component)
 - Edit indicator with timestamp
 - Deleted message placeholder
+- Voice message player with waveform visualization
 - Image preview with fullscreen modal
-- Dropdown menu for message actions
+- Dropdown menu for message actions (edit/delete)
+- Responsive design for all device sizes
 
 ### Real-Time Updates
 - Socket.IO for instant message delivery
