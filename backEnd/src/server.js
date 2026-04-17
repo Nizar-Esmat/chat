@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import { app, httpServer } from "./lib/socket.js";
 import { env } from "./config/env.js";
+import { errorHandler } from "./middleware/errorHandler.middleware.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes)
 import massagesRoute from "./routes/massage.route.js"
 app.use("/api/massage", massagesRoute)
 
+
 if (env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../../frontEnd/dist")));
 
@@ -30,6 +32,8 @@ if (env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "../../frontEnd/dist/index.html"));
   });
 }
+
+app.use(errorHandler)
 
 ConnectDb(() => {
   httpServer.listen(env.PORT, () => {

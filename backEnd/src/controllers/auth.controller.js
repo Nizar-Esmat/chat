@@ -4,8 +4,9 @@ import User from "../models/user.model.js";
 import { generateToken } from "../lib/utils.js";
 import { sendWelcomeEmail } from "../email/emailHandlers.js";
 import cloudnary from "../lib/cloudinary.js";
+import { MESSAGES } from "../utils/messages.js";
 
-export const signUp = async (req, res) => {
+export const signUp = async (req, res, next) => {
     const { fullName, email, password, passwordConfirmation, profilePic } = req.body;
     try {
         const result = validationResult(req)
@@ -13,7 +14,7 @@ export const signUp = async (req, res) => {
             return res.status(400).json({ errors: result.array() })
         }
         if (password !== passwordConfirmation) {
-            return res.status(400).json({ errors: [{ msg: "passwords don't match" }] })
+            return res.status(400).json({ errors: [{ msg: MESSAGES.AUTH.PASSWORDS_DONT_MATCH }] })
         }
 
         const hashedPassword = await bycrypt.hash(password, 12);
@@ -47,16 +48,16 @@ export const signUp = async (req, res) => {
             fullName: newUser.fullName,
             email: newUser.email,
             profilePic: newUser.profilePic,
-            msg: "user created successfully"
+            msg: MESSAGES.AUTH.USER_CREATED
         })
 
     } catch (err) {
         console.log("error in signUp controller:", err);
-        res.status(500).json({ msg: "internal server error", error: err.message })
+        next(err);
     }
 }
 
-export const signIn = async (req, res) => {
+export const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const result = validationResult(req)
@@ -65,20 +66,20 @@ export const signIn = async (req, res) => {
         }
         const user = await User.findOne({ email })
         if (!user) {
-            return res.status(400).json({ errors: [{ msg: "invalid credentials" }] })
+            return res.status(400).json({ errors: [{ msg: MESSAGES.AUTH.INVALID_CREDENTIALS }] })
         }
         const isMatch = await bycrypt.compare(password, user.password)
         if (!isMatch) {
-            return res.status(400).json({ errors: [{ msg: "invalid credentials" }] })
+            return res.status(400).json({ errors: [{ msg: MESSAGES.AUTH.INVALID_CREDENTIALS }] })
         }
         generateToken(user._id, res)
         res.status(200).json({
-            msg: "user signed in",
+            msg: MESSAGES.AUTH.USER_SIGNED_IN,
             user: user
         })
     } catch (err) {
         console.log("error in  signIn controller", err);
-        res.status(500).json({ msg: "internal server error" })
+        next(err);
     }
 }
 
@@ -86,9 +87,9 @@ export const logOut = (_, res) => {
     res.cookie("jwt", "", {
         maxAge: 0
     });
-    res.status(200).json({ msg: "user logged out" })
+    res.status(200).json({ msg: MESSAGES.AUTH.USER_LOGGED_OUT })
 }
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
     try {
         let { fullName, profilePic } = req.body;
         const userId = req.user.id;
@@ -100,7 +101,7 @@ export const updateProfile = async (req, res) => {
             profilePic = user.profilePic
         }
         if (!user) {
-            return res.status(400).json({ errors: [{ msg: "user not found" }] })
+            return res.status(400).json({ errors: [{ msg: MESSAGES.AUTH.USER_NOT_FOUND }] })
         }
         if (profilePic) {
             await cloudnary.uploader.destroy(user.profilePic);
@@ -110,11 +111,11 @@ export const updateProfile = async (req, res) => {
         user.profilePic = updateProfilePic.secure_url;
         await user.save();
         res.status(200).json({
-            msg: "user profile updated",
+            msg: MESSAGES.AUTH.PROFILE_UPDATED,
             user: user
         })
     } catch (err) {
-        res.status(500).json({ msg: "internal server error" });
-        console.log("error in  updateProfile controller", err)
+        console.log("error in  updateProfile controller", err);
+        next(err);
     }
 }

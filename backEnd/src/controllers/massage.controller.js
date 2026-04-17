@@ -3,18 +3,19 @@ import Massage from "../models/massage.model.js";
 import User from "../models/user.model.js";
 import cloudnary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { MESSAGES } from "../utils/messages.js";
 
 
-const getAllContacts = async (req, res) => {
+const getAllContacts = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const filteredUsers = await User.find({ _id: { $ne: userId } }).select(["-password"]);
         res.status(200).json(filteredUsers);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 }
-const ChatPartners = async (req, res) => {
+const ChatPartners = async (req, res, next) => {
     try {
         const userId = req.user?.id;
         console.log("Logged in user ID:", userId);
@@ -29,13 +30,13 @@ const ChatPartners = async (req, res) => {
         }))]
 
         const filteredPartners = await User.find({ _id: { $in: partnerChat } }).select(["-password"]);
-        res.status(200).json({ msg: "chat partners fetched successfully", partners: filteredPartners });
+        res.status(200).json({ msg: MESSAGES.MASSAGE.CHAT_PARTNERS_FETCHED, partners: filteredPartners });
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 }
 
-const getMassagesByUserId = async (req, res) => {
+const getMassagesByUserId = async (req, res, next) => {
     try {
         const logqgedInUserId = req.user.id;
         const userId = req.params.id;
@@ -45,13 +46,13 @@ const getMassagesByUserId = async (req, res) => {
                 { reseiverId: userId, senderId: logqgedInUserId }
             ]
         })
-        res.status(200).json({ msg: "massages fetched successfully", massages })
+        res.status(200).json({ msg: MESSAGES.MASSAGE.FETCHED, massages })
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 }
 
-const sendMassage = async (req, res) => {
+const sendMassage = async (req, res, next) => {
     try {
         const errors = validationResult(req);
 
@@ -92,19 +93,17 @@ const sendMassage = async (req, res) => {
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMassage", { newMassage });
         }
-        res.status(201).json({ msg: "massage sent successfully", massage: newMassage });
+        res.status(201).json({ msg: MESSAGES.MASSAGE.SENT, massage: newMassage });
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: "Internal server error" });
+        next(error);
     }
 }
 
-const deleteMassage = async (req, res) => {
+const deleteMassage = async (req, res, next) => {
     try {
         const massageId = req.params.id;
         const massage = req.massage;
-
 
         const deleteMassage = await Massage.findByIdAndUpdate(
             massageId,
@@ -112,20 +111,17 @@ const deleteMassage = async (req, res) => {
             { new: true }
         );
 
-
-
         const receiverSocketId = getReceiverSocketId(massage.reseiverId.toString());
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("deleteMassage", { massageId, massage: deleteMassage });
         }
-        res.status(200).json({ msg: "massage deleted successfully", massage: deleteMassage });
+        res.status(200).json({ msg: MESSAGES.MASSAGE.DELETED, massage: deleteMassage });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: "Internal server error" });
+        next(error);
     }
 }
 
-const editMassage = async (req, res) => {
+const editMassage = async (req, res, next) => {
     try {
         const errors = validationResult(req);
 
@@ -139,7 +135,7 @@ const editMassage = async (req, res) => {
 
         // Voice messages cannot be edited
         if (massage.voiceUrl) {
-            return res.status(400).json({ msg: "Cannot edit voice messages" });
+            return res.status(400).json({ msg: MESSAGES.MASSAGE.CANNOT_EDIT_VOICE });
         }
 
         let uploadImage = massage.imageUrl;
@@ -168,10 +164,9 @@ const editMassage = async (req, res) => {
             io.to(receiverSocketId).emit("editMassage", { updatedMassage });
         }
 
-        res.status(200).json({ msg: "massage updated successfully", massage: updatedMassage });
+        res.status(200).json({ msg: MESSAGES.MASSAGE.UPDATED, massage: updatedMassage });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: "Internal server error" });
+        next(error);
     }
 }
 
