@@ -9,8 +9,20 @@ import { MESSAGES } from "../utils/messages.js";
 const getAllContacts = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const filteredUsers = await User.find({ _id: { $ne: userId } }).select(["-password"]);
-        res.status(200).json(filteredUsers);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const total = await User.countDocuments({ _id: { $ne: userId } });
+        const filteredUsers = await User.find({ _id: { $ne: userId } })
+            .select("-password")
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            contacts: filteredUsers,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        });
     } catch (error) {
         next(error);
     }
@@ -18,19 +30,29 @@ const getAllContacts = async (req, res, next) => {
 const ChatPartners = async (req, res, next) => {
     try {
         const userId = req.user?.id;
-        console.log("Logged in user ID:", userId);
-        const massages = await Massage.find({
-            $or: [
-                { senderId: userId },
-                { reseiverId: userId }
-            ]
-        });
-        const partnerChat = [...new Set(massages.map(massage => {
-            return massage.senderId.toString() == userId.toString() ? massage.reseiverId.toString() : massage.senderId.toString();
-        }))]
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
 
-        const filteredPartners = await User.find({ _id: { $in: partnerChat } }).select(["-password"]);
-        res.status(200).json({ msg: MESSAGES.MASSAGE.CHAT_PARTNERS_FETCHED, partners: filteredPartners });
+        const massages = await Massage.find({
+            $or: [{ senderId: userId }, { reseiverId: userId }]
+        }).select("senderId reseiverId");
+
+        const partnerIds = [...new Set(massages.map(massage =>
+            massage.senderId.toString() === userId.toString()
+                ? massage.reseiverId.toString()
+                : massage.senderId.toString()
+        ))];
+
+        const total = partnerIds.length;
+        const paginatedIds = partnerIds.slice(skip, skip + limit);
+        const filteredPartners = await User.find({ _id: { $in: paginatedIds } }).select("-password");
+
+        res.status(200).json({
+            msg: MESSAGES.MASSAGE.CHAT_PARTNERS_FETCHED,
+            partners: filteredPartners,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        });
     } catch (error) {
         next(error);
     }
@@ -40,13 +62,28 @@ const getMassagesByUserId = async (req, res, next) => {
     try {
         const logqgedInUserId = req.user.id;
         const userId = req.params.id;
-        const massages = await Massage.find({
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const query = {
             $or: [
                 { senderId: userId, reseiverId: logqgedInUserId },
                 { reseiverId: userId, senderId: logqgedInUserId }
             ]
-        })
-        res.status(200).json({ msg: MESSAGES.MASSAGE.FETCHED, massages })
+        };
+
+        const total = await Massage.countDocuments(query);
+        const massages = await Massage.find(query)
+            .sort({ createdAt: 1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            msg: MESSAGES.MASSAGE.FETCHED,
+            massages,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        });
     } catch (error) {
         next(error);
     }
