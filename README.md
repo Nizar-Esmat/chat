@@ -117,6 +117,29 @@ NizarChat/
 - Live edit/delete sync across users
 - Online status indicators
 
+## 📬 API Reference (Postman)
+
+A ready-to-use Postman collection is included in the repository root:  
+**`NizarChat.postman_collection.json`**
+
+Import it into Postman to explore and test all API endpoints.
+
+| Group | Endpoint | Method | Auth |
+|-------|----------|--------|------|
+| Auth | `/api/auth/signUp` | POST | ❌ |
+| Auth | `/api/auth/login` | POST | ❌ |
+| Auth | `/api/auth/logout` | POST | ❌ |
+| Auth | `/api/auth/updateProfile` | PUT | ✅ |
+| Auth | `/api/auth/is_auth` | GET | ✅ |
+| Messages | `/api/massage/AllContacts` | GET | ✅ |
+| Messages | `/api/massage/chats` | GET | ✅ |
+| Messages | `/api/massage/:id` | GET | ✅ |
+| Messages | `/api/massage/sendMassage/:reseiverId` | POST | ✅ |
+| Messages | `/api/massage/editMassage/:id` | PATCH | ✅ |
+| Messages | `/api/massage/deleteMassage/:id` | DELETE | ✅ |
+
+> Set the `baseUrl` collection variable to `http://localhost:5000/api` (default). Auth is handled automatically via HTTP-only JWT cookies — log in first, then all protected requests will work.
+
 ## 🤝 Contributing
 
 Contributions welcome! Fork, create a feature branch, and open a PR.
