@@ -1,0 +1,402 @@
+{
+  "info": {
+    "name": "NizarChat API",
+    "description": "Complete API collection for the NizarChat real-time chat application.\n\nBase URL: `http://localhost:5000/api`\n\nAuthentication is handled via HTTP-only JWT cookies set automatically on login/signup.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Authentication routes — sign up, login, logout, profile update, and auth check.",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signUp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signUp"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"passwordConfirmation\": \"password123\",\n  \"profilePic\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Register a new user account.\n\n**Body:**\n- `fullName` (required) — 3–30 characters\n- `email` (required) — must be a valid, unique email\n- `password` (required) — min 6 characters\n- `passwordConfirmation` (required) — must match `password`\n- `profilePic` (optional) — base64 image string\n\n**Returns:** user object + sets JWT cookie"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"<userId>\",\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"profilePic\": \"\",\n  \"msg\": \"User created successfully\"\n}"
+            },
+            {
+              "name": "400 Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"errors\": [\n    { \"msg\": \"user already exists\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Log in to an existing account.\n\n**Body:**\n- `email` (required) — registered email\n- `password` (required) — 3–30 characters\n\n**Returns:** user object + sets JWT cookie"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"User signed in successfully\",\n  \"user\": { \"_id\": \"<userId>\", \"fullName\": \"John Doe\", \"email\": \"john@example.com\" }\n}"
+            },
+            {
+              "name": "400 Invalid Credentials",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"errors\": [\n    { \"msg\": \"Invalid credentials\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Log out the current user. Clears the JWT cookie.\n\n**Auth:** not required"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"User logged out successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/updateProfile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "updateProfile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Updated\",\n  \"profilePic\": \"<base64-encoded-image>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Update the authenticated user's display name and/or profile picture.\n\n**Auth:** required (JWT cookie)\n\n**Body:**\n- `fullName` (required) — 3–30 characters (pass existing name to keep it)\n- `profilePic` (required) — base64 image string (pass existing URL to keep it)\n\n**Returns:** updated user object"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"Profile updated successfully\",\n  \"user\": { \"_id\": \"<userId>\", \"fullName\": \"John Updated\", \"profilePic\": \"<cloudinaryUrl>\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Check Auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/is_auth",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "is_auth"]
+            },
+            "description": "Verify whether the current session is authenticated and retrieve the logged-in user's data.\n\n**Auth:** required (JWT cookie)\n\n**Returns:** current user object"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"user\": { \"_id\": \"<userId>\", \"fullName\": \"John Doe\", \"email\": \"john@example.com\" }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"msg\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "description": "Message routes — all require authentication via JWT cookie.\n\nPagination is supported on list endpoints via `?page=1&limit=20` query params.",
+      "item": [
+        {
+          "name": "Get All Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/massage/AllContacts?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "AllContacts"],
+              "query": [
+                { "key": "page", "value": "1", "description": "Page number (default: 1)" },
+                { "key": "limit", "value": "20", "description": "Items per page (1–100, default: 20)" }
+              ]
+            },
+            "description": "Retrieve all registered users (excluding the current user).\n\n**Auth:** required\n\n**Query:**\n- `page` (optional, default: 1)\n- `limit` (optional, default: 20, max: 100)\n\n**Returns:** paginated list of users"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"contacts\": [ { \"_id\": \"<userId>\", \"fullName\": \"Jane\", \"email\": \"jane@example.com\", \"profilePic\": \"\" } ],\n  \"pagination\": { \"total\": 50, \"page\": 1, \"limit\": 20, \"totalPages\": 3 }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Chat Partners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/massage/chats?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "chats"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            },
+            "description": "Retrieve the list of users the current user has exchanged messages with.\n\n**Auth:** required\n\n**Query:**\n- `page` (optional, default: 1)\n- `limit` (optional, default: 20, max: 100)\n\n**Returns:** paginated list of chat partners"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"Chat partners fetched successfully\",\n  \"partners\": [ { \"_id\": \"<userId>\", \"fullName\": \"Jane\" } ],\n  \"pagination\": { \"total\": 5, \"page\": 1, \"limit\": 20, \"totalPages\": 1 }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Messages with User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/massage/{{userId}}?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "{{userId}}"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            },
+            "description": "Retrieve the message history between the current user and a specific user.\n\n**Auth:** required\n\n**Path params:**\n- `:id` — the other user's MongoDB ID\n\n**Query:**\n- `page` (optional, default: 1)\n- `limit` (optional, default: 20, max: 100)\n\n**Returns:** paginated messages sorted oldest-first"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"Messages fetched successfully\",\n  \"massages\": [\n    {\n      \"_id\": \"<messageId>\",\n      \"senderId\": \"<userId>\",\n      \"reseiverId\": \"<userId>\",\n      \"text\": \"Hello!\",\n      \"imageUrl\": \"\",\n      \"voiceUrl\": \"\",\n      \"voiceDuration\": 0,\n      \"isDeleted\": false,\n      \"isEdited\": false,\n      \"createdAt\": \"2024-01-01T00:00:00.000Z\"\n    }\n  ],\n  \"pagination\": { \"total\": 100, \"page\": 1, \"limit\": 20, \"totalPages\": 5 }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/massage/sendMassage/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "sendMassage", "{{userId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello there!\",\n  \"imageUrl\": \"\",\n  \"voiceUrl\": \"\",\n  \"voiceDuration\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send a message to another user. At least one of `text`, `imageUrl`, or `voiceUrl` must be provided.\n\n**Auth:** required\n\n**Path params:**\n- `:reseiverId` — the recipient's MongoDB ID\n\n**Body (at least one required):**\n- `text` (optional) — up to 1000 characters\n- `imageUrl` (optional) — base64 image string (uploaded to Cloudinary)\n- `voiceUrl` (optional) — base64 audio string (uploaded to Cloudinary)\n- `voiceDuration` (optional) — duration in seconds\n\n**Returns:** saved message object\n\n**Side effect:** emits `newMassage` socket event to recipient if online"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"msg\": \"Message sent successfully\",\n  \"massage\": {\n    \"_id\": \"<messageId>\",\n    \"senderId\": \"<userId>\",\n    \"reseiverId\": \"<userId>\",\n    \"text\": \"Hello there!\"\n  }\n}"
+            },
+            {
+              "name": "400 Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"errors\": [\n    { \"msg\": \"either text, imageUrl or voiceUrl must be provided\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Edit Message",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/massage/editMassage/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "editMassage", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<messageId>",
+                  "description": "MongoDB ID of the message to edit"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Updated message text\",\n  \"imageUrl\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Edit a sent message. Only the original sender can edit. Voice messages cannot be edited.\n\n**Auth:** required\n\n**Path params:**\n- `:id` — message MongoDB ID\n\n**Body:**\n- `text` (optional) — up to 1000 characters\n- `imageUrl` (optional) — new base64 image (old image is deleted from Cloudinary)\n\n**Returns:** updated message object\n\n**Side effect:** emits `editMassage` socket event to the other user if online"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"Message updated successfully\",\n  \"massage\": { \"_id\": \"<messageId>\", \"text\": \"Updated message text\", \"isEdited\": true }\n}"
+            },
+            {
+              "name": "403 Forbidden (not owner)",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"msg\": \"Unauthorized\"\n}"
+            },
+            {
+              "name": "400 Cannot Edit Voice",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"msg\": \"Voice messages cannot be edited\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/massage/deleteMassage/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["massage", "deleteMassage", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<messageId>",
+                  "description": "MongoDB ID of the message to delete"
+                }
+              ]
+            },
+            "description": "Soft-delete a message (marks it as deleted, does not remove it from the database). Only the original sender can delete.\n\n**Auth:** required\n\n**Path params:**\n- `:id` — message MongoDB ID\n\n**Returns:** updated message object with `isDeleted: true`\n\n**Side effect:** emits `deleteMassage` socket event to the other user if online"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"msg\": \"Message deleted successfully\",\n  \"massage\": { \"_id\": \"<messageId>\", \"isDeleted\": true, \"deletedAt\": \"2024-01-01T00:00:00.000Z\" }\n}"
+            },
+            {
+              "name": "403 Forbidden (not owner)",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"msg\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
